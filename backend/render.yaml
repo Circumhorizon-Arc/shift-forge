@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: shiftforge-api
+    runtime: python
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shiftforge-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: "gemini-1.5-flash"
+
+databases:
+  - name: shiftforge-db
+    databaseName: shiftforge
+    user: shiftforge_user
