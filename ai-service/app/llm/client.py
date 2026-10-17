@@ -316,7 +316,11 @@ class GeminiLLMClient(BaseLLMClient):
         findings: List[ExtractedFinding],
     ) -> LLMExplanationPayload:
         prompt = self._prepare_prompt(report_text, findings)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        headers = {
+            "x-goog-api-key": self.api_key,
+            "Content-Type": "application/json",
+        }
         body = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -327,7 +331,7 @@ class GeminiLLMClient(BaseLLMClient):
 
         try:
             with httpx.Client(timeout=self.timeout) as client:
-                response = client.post(url, json=body)
+                response = client.post(url, json=body, headers=headers)
                 response.raise_for_status()
                 data = response.json()
                 text = data["candidates"][0]["content"]["parts"][0]["text"]
@@ -335,8 +339,12 @@ class GeminiLLMClient(BaseLLMClient):
                 return LLMExplanationPayload.model_validate(parsed)
         except httpx.TimeoutException:
             raise LLMTimeoutError(self.timeout)
-        except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-            raise LLMServiceError(f"Gemini API request failed: {exc}", provider="gemini")
+        except httpx.HTTPStatusError as exc:
+            raise LLMServiceError(
+                f"Gemini API returned HTTP {exc.response.status_code}", provider="gemini"
+            )
+        except httpx.RequestError:
+            raise LLMServiceError("Gemini API request failed (network error)", provider="gemini")
         except ValidationError as exc:
             raise LLMValidationError(f"Gemini response schema invalid: {exc}")
 
@@ -346,7 +354,11 @@ class GeminiLLMClient(BaseLLMClient):
         findings: List[ExtractedFinding],
     ) -> LLMExplanationPayload:
         prompt = self._prepare_prompt(report_text, findings)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        headers = {
+            "x-goog-api-key": self.api_key,
+            "Content-Type": "application/json",
+        }
         body = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -357,7 +369,7 @@ class GeminiLLMClient(BaseLLMClient):
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(url, json=body)
+                response = await client.post(url, json=body, headers=headers)
                 response.raise_for_status()
                 data = response.json()
                 text = data["candidates"][0]["content"]["parts"][0]["text"]
@@ -365,8 +377,12 @@ class GeminiLLMClient(BaseLLMClient):
                 return LLMExplanationPayload.model_validate(parsed)
         except httpx.TimeoutException:
             raise LLMTimeoutError(self.timeout)
-        except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-            raise LLMServiceError(f"Gemini API async request failed: {exc}", provider="gemini")
+        except httpx.HTTPStatusError as exc:
+            raise LLMServiceError(
+                f"Gemini API returned HTTP {exc.response.status_code}", provider="gemini"
+            )
+        except httpx.RequestError:
+            raise LLMServiceError("Gemini API async request failed (network error)", provider="gemini")
         except ValidationError as exc:
             raise LLMValidationError(f"Gemini response schema invalid: {exc}")
 

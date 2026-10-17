@@ -2,8 +2,10 @@
 
 import io
 from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
+
 from app.llm.client import MockLLMClient
 from app.main import app
 
@@ -27,7 +29,7 @@ def test_health_check_endpoint(client: TestClient):
 def test_api_upload_valid_pdf(client: TestClient, digital_pdf_bytes: bytes):
     """Verify POST /api/v1/report-analysis with a valid PDF upload."""
     files = {
-        "file": ("jane_doe_lab.pdf", digital_pdf_bytes, "application/pdf")
+        "file": ("report.pdf", digital_pdf_bytes, "application/pdf")
     }
     with patch(
         "app.processing.report_pipeline.get_llm_client",
@@ -78,3 +80,45 @@ def test_api_upload_corrupted_file(client: TestClient):
     data = response.json()
     assert data["status"] == "error"
     assert data["error_code"] == "CORRUPTED_FILE"
+
+
+# ---------------------------------------------------------------------------
+# /api/v1/uploads — access control
+# ---------------------------------------------------------------------------
+
+def test_uploads_endpoint_disabled_without_token(client: TestClient):
+    """GET /api/v1/uploads must return 503 when INTERNAL_SERVICE_TOKEN is not configured."""
+    with patch("app.main.settings.INTERNAL_SERVICE_TOKEN", None):
+        response = client.get("/api/v1/uploads")
+    assert response.status_code == 503
+
+
+def test_uploads_endpoint_rejects_missing_bearer(client: TestClient):
+    """GET /api/v1/uploads must return 401 when no Authorization header is sent."""
+    with patch("app.main.settings.INTERNAL_SERVICE_TOKEN", "super-secret-token"):
+        response = client.get("/api/v1/uploads")
+    assert response.status_code == 401
+
+
+def test_uploads_endpoint_rejects_wrong_token(client: TestClient):
+    """GET /api/v1/uploads must return 401 for an incorrect token."""
+    with patch("app.main.settings.INTERNAL_SERVICE_TOKEN", "correct-token"):
+        response = client.get(
+            "/api/v1/uploads",
+            headers={"Authorization": "Bearer wrong-token"},
+        )
+    assert response.status_code == 401
+
+
+def test_uploads_endpoint_accepts_correct_token(client: TestClient):
+    """GET /api/v1/uploads must return 200 for a correctly authenticated request."""
+    with patch("app.main.settings.INTERNAL_SERVICE_TOKEN", "valid-service-token"):
+        response = client.get(
+            "/api/v1/uploads",
+            headers={"Authorization": "Bearer valid-service-token"},
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert "total" in data
+    assert "uploads" in data
+    assert isinstance(data["uploads"], list)

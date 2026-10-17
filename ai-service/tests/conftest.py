@@ -1,9 +1,26 @@
-"""Test fixtures and synthetic document generators for HealthSense AI service."""
+"""Test fixtures and synthetic document generators for HealthSense AI service.
+
+Tracker isolation
+-----------------
+Every test that calls into the pipeline or the API must either:
+  (a) pass tracker=NoOpTracker() explicitly to process_medical_report / process_medical_report_async, or
+  (b) use the ``isolated_tracker`` autouse fixture defined here, which patches the
+      module-level ``app.tracker._tracker`` with an InMemoryTracker for the duration
+      of the test and restores the original afterward.
+
+This prevents automated tests from writing to the operational
+``data/upload_history.json`` file while still allowing tracker-specific tests
+to exercise real persistence logic via ``tmp_path`` and ``JsonFileTracker``.
+"""
 
 import io
+from unittest.mock import patch
+
 import pytest
 import pymupdf
 from PIL import Image, ImageDraw, ImageFont
+
+from app.tracker import InMemoryTracker, NoOpTracker
 
 
 SAMPLE_LAB_REPORT_TEXT = """
@@ -76,6 +93,31 @@ def create_synthetic_scanned_pdf(text: str) -> bytes:
     doc.close()
     return pdf_bytes
 
+
+# ---------------------------------------------------------------------------
+# Tracker isolation — applied automatically to every test
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def isolated_tracker():
+    """Replace the module-level tracker with an in-memory instance for this test.
+
+    This ensures no test writes to the operational data/upload_history.json file.
+    Tests that want to inspect tracker state can access the InMemoryTracker via
+    the fixture's yielded value:
+
+        def test_something(isolated_tracker):
+            ...
+            assert isolated_tracker.count() == 1
+    """
+    mem_tracker = InMemoryTracker()
+    with patch("app.tracker._tracker", mem_tracker):
+        yield mem_tracker
+
+
+# ---------------------------------------------------------------------------
+# Document fixtures
+# ---------------------------------------------------------------------------
 
 @pytest.fixture
 def sample_report_text() -> str:
