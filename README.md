@@ -1,329 +1,207 @@
-# HealthSense AI
+# Health Sense — AI-Powered Healthcare & Well-Being Platform
 
-**An AI-powered patient support and healthcare coordination platform.**
+A serious, presentation-ready healthcare web application built for a 24-hour hackathon. **Health Sense** helps users organize clinical records, understand diagnostic lab reports through plain-language AI-assisted explanations, track biomarker trends over time, and prepare structured questions for doctor consultations.
 
-HealthSense AI is a hackathon prototype designed to help people understand medical report terminology, organize health information, track basic measurements, and prepare for conversations with healthcare professionals.
+---
 
-> **Important medical disclaimer:** HealthSense AI is an educational and organizational tool, not a medical device or substitute for professional medical advice, diagnosis, or treatment. It must not be used to make treatment decisions or as an emergency service. AI-generated explanations can be incomplete or incorrect; users should discuss their reports with a qualified healthcare professional.
+## 1. Project Overview
 
-## Table of Contents
+Medical laboratory reports are filled with complex scientific notation, reference ranges, and dense abbreviations. Patients often struggle to interpret their results, leading to unnecessary anxiety or overlooked warning signs.
 
-- [Problem Statement](#problem-statement)
-- [Proposed Solution](#proposed-solution)
-- [Key Features](#key-features)
-- [Technology Stack](#technology-stack)
-- [System Architecture](#system-architecture)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [API Overview](#api-overview)
-- [Privacy and Safety](#privacy-and-safety)
-- [Development Roadmap](#development-roadmap)
-- [Team Contributions](#team-contributions)
-- [Contributing](#contributing)
-- [License](#license)
+**Health Sense** bridges this health literacy gap by:
+1. Parsing uploaded laboratory reports (PDF, JPG, PNG).
+2. Generating neutral, plain-language summaries and educational explanations.
+3. Distinguishing numerical facts extracted from the report from AI educational explanations.
+4. Providing actionable questions for patients to discuss with their healthcare professional.
+5. Providing longitudinal health trend tracking (heart rate, blood pressure, glucose, weight, temperature).
+6. Managing clinical appointments and health reminders.
 
-## Problem Statement
+> **Important Healthcare Safety Note:**
+> Health Sense is **not a doctor**. It does not diagnose medical conditions, prescribe medication, recommend changing treatment, or provide definitive clinical conclusions. All content is strictly educational and non-diagnostic.
 
-Medical reports often contain technical terms, laboratory values, units, and reference ranges that can be difficult for patients to interpret. Patients may also find it challenging to keep their records organized, monitor measurements over time, and remember follow-up appointments.
+---
 
-## Proposed Solution
+## 2. Key Features
 
-HealthSense AI brings selected patient-support workflows into one web application. Its main feature is an AI-assisted medical report explainer that extracts available information from an uploaded report and presents a structured, plain-language explanation. Supporting features can help users maintain basic health records and organize follow-ups.
+- **AI-Assisted Report Explanation**:
+  - Plain-language summary clearly labeled as an educational overview.
+  - Structured Finding Cards with reference range indicators and neutral status ("Within reported reference range" / "Outside the laboratory's stated reference range").
+  - "What Does This Mean?" plain-language educational breakdown.
+  - Interactive "Questions to Ask Your Doctor" with checklist and one-click copy.
+  - Downloadable summary and printable doctor consultation views.
+- **Drag-and-Drop Medical Report Upload**:
+  - Supports PDF, JPG, and PNG formats up to 25 MB.
+  - Multi-stage upload simulation (Uploading → Parsing Observations → Plain-Language AI → Complete).
+- **Patient Dashboard**:
+  - Summary KPI cards (Reports, Records, Upcoming Appointment, Reminders).
+  - Interactive Recharts Heart Rate Trend visualizer.
+  - Quick-access Recent Reports and Next Consultation modules.
+- **Health Records & Biomarker Trends**:
+  - Multi-metric time-series trend visualizer (Heart Rate, Blood Pressure, Fasting Glucose, Weight, Temperature).
+  - Modal to log new vital sign measurements with validation.
+  - Historical entries table with deletion support.
+- **Appointment Management**:
+  - Filter by Upcoming and Past Consultations.
+  - In-person clinic visits and Telehealth video appointments.
+  - Booking modal with validation and instant UI updates.
+- **Healthcare Reminders**:
+  - Categorized tasks (Doctor Follow-Up, Lab Test Review, Annual Checkup, Medication Refill).
+  - One-click completion toggling and deletion.
+  - Modal to create reminders with priority flags.
+- **Authentication & Settings**:
+  - Dedicated `authService` layer for login and registration.
+  - Profile management, notification preferences, and privacy controls.
+- **Full Responsive Design**:
+  - Desktop sidebar + main content layout.
+  - Tablet collapsible navigation.
+  - Mobile slide-over drawer navigation.
 
-The prototype is intended to improve understanding and organization—not to diagnose conditions or replace clinicians.
+---
 
-## Key Features
+## 3. Tech Stack
 
-### MVP (core scope)
+- **Framework**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vite.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **Charts**: [Recharts](https://recharts.org/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
 
-- **Medical report upload:** Accept supported PDF and image files with server-side file validation.
-- **Text extraction:** Extract text from digital PDFs and use OCR for supported scanned documents.
-- **Structured findings:** Present extracted test names, values, units, reference ranges, and dates when available.
-- **Plain-language explanations:** Generate an AI-assisted explanation grounded in extracted report content.
-- **Consultation questions:** Suggest questions users may wish to discuss with a healthcare professional.
-- **Report history:** Allow an authenticated user to view their own previously processed reports.
+---
 
-### Optional extensions
+## 4. API-First Architecture
 
-- **Health tracking:** Record user-entered measurements and display trends over time.
-- **Follow-up reminders:** Organize appointment and follow-up reminders.
-- **Multilingual explanations:** Provide supported-language explanations with appropriate quality checks.
-- **Accessibility improvements:** Use readable layouts, clear language, keyboard navigation, and responsive design.
+The frontend components **never** directly call `axios` or `fetch`. All data operations flow through a strongly typed service abstraction layer:
 
-## Technology Stack
-
-The proposed stack may change during development. Replace or remove technologies that are not actually used in the implementation.
-
-| Layer | Proposed technology | Purpose |
-|---|---|---|
-| Frontend | React + TypeScript | User interface and dashboard |
-| Styling | Tailwind CSS | Responsive styling |
-| Charts | Recharts | Health measurement trends |
-| Backend | Python + FastAPI | REST API and application logic |
-| Validation | Pydantic | Request and response validation |
-| Database | PostgreSQL | Users, report metadata, findings, and records |
-| ORM / migrations | SQLAlchemy + Alembic | Database access and schema changes |
-| PDF extraction | PyMuPDF | Extract text from digital PDFs |
-| OCR | Tesseract OCR + Pillow | Extract text from supported scanned reports |
-| AI | An LLM API or a suitable self-hosted model | Plain-language explanations |
-| Testing | pytest | Backend and service tests |
-| Version control | Git + GitHub | Collaboration and change tracking |
-| Deployment | A hosting platform compatible with the chosen stack | Demo and application hosting |
-
-Redis, Celery, Docker, and a vector database are optional. Add them only when the project needs them.
-
-## System Architecture
-
-```text
-User
-  |
-  v
-React + TypeScript frontend
-  |
-  | HTTPS / REST API
-  v
-FastAPI backend
-  |                 |
-  v                 v
-PostgreSQL       Document processing
-                 (PDF extraction / OCR)
-                       |
-                       v
-                Structured extracted data
-                       |
-                       v
-                 AI explanation service
-                       |
-                       v
-             Validated explanation response
-                       |
-                       v
-              Frontend results and history
+```
+Component
+   ↓
+Service (e.g. reportService, healthService, appointmentService, authService)
+   ↓
+Centralized API Client (src/services/api.ts)
+   ↓
+Backend API (or Mock Fallback if VITE_USE_MOCK_API=true)
 ```
 
-The document-processing and AI components can initially be Python modules within the backend. They do not need to be separate microservices for a hackathon prototype.
+### Switching Between Mock and Real Backend
 
-## Project Structure
+Health Sense includes a configurable environment flag in `.env`:
 
-One possible starting structure is:
+```env
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_USE_MOCK_API=true
+```
 
-```text
-carebridge-ai/
-├── frontend/
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── README.md
-├── backend/
-│   ├── src/
-│   │   ├── main.py
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   ├── config/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── repositories/
-│   │   ├── services/
-│   │   │   ├── document_service.py
-│   │   │   └── ai_service.py
-│   │   └── utils/
-│   ├── tests/
-│   ├── migrations/
-│   └── requirements.txt
-├── docs/
-├── .gitignore
+- When `VITE_USE_MOCK_API=true`: Services utilize local simulated data with full CRUD state persistence in `localStorage`.
+- When `VITE_USE_MOCK_API=false`: Services dispatch live HTTP requests to `VITE_API_BASE_URL` with JWT bearer authorization headers attached automatically via interceptors.
+
+---
+
+## 5. Project Structure
+
+```
+shift-forge/
+├── src/
+│   ├── components/
+│   │   ├── layout/            # Sidebar, Header, MobileNavigation, AppLayout
+│   │   ├── ui/                # Button, Card, Badge, Modal, Input, Select, etc.
+│   │   ├── dashboard/         # StatCard, HealthTrendChart, RecentReports, etc.
+│   │   ├── reports/           # FindingCard, DoctorQuestions, ReportUpload, etc.
+│   │   └── health/            # HealthChart, HealthRecordFormModal
+│   │
+│   ├── pages/
+│   │   ├── Landing.tsx        # Public landing page with problem/solution/features
+│   │   ├── Login.tsx          # Login with authService abstraction
+│   │   ├── Register.tsx       # Registration with validation
+│   │   ├── Dashboard.tsx      # Patient overview with Recharts trends
+│   │   ├── Reports.tsx        # Medical reports list with filtering & search
+│   │   ├── UploadReport.tsx   # Drag-and-drop report uploader
+│   │   ├── ReportAnalysis.tsx # STAR SCREEN: 5-section AI explanation
+│   │   ├── HealthRecords.tsx  # Multi-metric vitals tracking
+│   │   ├── Appointments.tsx   # Upcoming/past doctor appointments
+│   │   ├── Reminders.tsx      # Healthcare task reminders
+│   │   └── Settings.tsx       # Profile, preferences, and privacy
+│   │
+│   ├── services/
+│   │   ├── api.ts             # Central Axios instance & error handler
+│   │   ├── authService.ts     # Login, register, profile updates
+│   │   ├── reportService.ts   # Report upload, listing, AI analysis
+│   │   ├── healthService.ts   # Biomarker metrics and calculations
+│   │   ├── appointmentService.ts # Appointment scheduling & listing
+│   │   └── reminderService.ts # Reminder CRUD operations
+│   │
+│   ├── types/                 # Central TypeScript interfaces & barrel
+│   ├── data/mock/             # Realistic synthetic clinical mock datasets
+│   ├── context/               # AuthContext & ToastContext
+│   ├── utils/                 # cn class utility
+│   ├── routes/                # React Router index configuration
+│   ├── App.tsx
+│   └── main.tsx
 ├── .env.example
-└── README.md
+├── package.json
+└── vite.config.ts
 ```
 
-This is a suggested structure, not a claim that all directories or features have already been implemented.
+---
 
-## Getting Started
+## 6. Installation & Running Locally
 
 ### Prerequisites
+- Node.js (v18 or higher; v24 recommended)
+- npm (v9 or higher)
 
-Install the tools required for the components you intend to run:
+### Steps
 
-- Git
-- Python 3.11 or a compatible version supported by your dependencies
-- Node.js LTS and npm
-- PostgreSQL
-- Tesseract OCR, if OCR for scanned documents is enabled
-- An API key for the selected AI provider, if using an external AI service
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Circumhorizon-Arc/shift-forge.git
+   cd shift-forge
+   ```
 
-### 1. Clone the repository
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-```bash
-git clone <YOUR_REPOSITORY_URL>
-cd shift-forge
-```
+3. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   ```
 
-Replace `<YOUR_REPOSITORY_URL>` with the actual repository URL.
+4. **Start the local development server**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 2. Configure the backend
+5. **Build for production**:
+   ```bash
+   npm run build
+   ```
 
-```bash
-cd backend
-python -m venv .venv
-```
+---
 
-Activate the virtual environment:
+## 7. Real Backend Integration Guide
 
-**Windows PowerShell**
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+When you are ready to connect your backend services (FastAPI, Express, Django, etc.):
 
-**macOS / Linux**
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies after creating `requirements.txt`:
-
-```bash
-pip install -r requirements.txt
-```
-
-Configure the backend environment variables as described below. Create the database and apply the migrations once the project's database configuration and migrations are in place.
-
-Start the development server (assuming the FastAPI application is exposed as `src.main:app`):
-
-```bash
-uvicorn src.main:app --reload
-```
-
-The API documentation is typically available at:
-
-- Swagger UI: `http://127.0.0.1:8000/docs`
-- OpenAPI schema: `http://127.0.0.1:8000/openapi.json`
-
-These commands and paths may need adjustment to match the implemented project structure.
-
-### 3. Configure the frontend
-
-Open a second terminal:
-
-```bash
-cd frontend
-npm install
-```
-
-Create a frontend environment file if required by your setup, then start the development server:
-
-```bash
-npm run dev
-```
-
-Use the local URL printed by the development server. Configure the frontend API base URL to point to the backend.
-
-> The repository is a project blueprint until implementation files are added. Setup commands, scripts, routes, and environment variable names must match the actual code before the project is considered runnable.
-
-## Environment Variables
-
-Keep secrets in local environment files and hosting-provider secret settings. Never commit real API keys, passwords, database credentials, tokens, or patient data.
-
-An illustrative `.env.example` might contain:
-
-```dotenv
-APP_ENV=development
-DATABASE_URL=postgresql+psycopg://USER:PASSWORD@localhost:5432/carebridge
-SECRET_KEY=replace-with-a-long-random-secret
-AI_PROVIDER=replace-with-your-provider
-AI_API_KEY=
-AI_MODEL=
-FRONTEND_ORIGIN=http://localhost:5173
-MAX_UPLOAD_SIZE_MB=10
-```
-
-These names are examples. Update them to match the application configuration. Use a strong generated secret for `SECRET_KEY`; do not use the example value in production. Keep `.env` files out of version control.
-
-## API Overview
-
-The following routes are proposed API contracts. They are not guaranteed to exist until implemented.
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `POST` | `/api/v1/auth/register` | Register a user |
-| `POST` | `/api/v1/auth/login` | Authenticate a user |
-| `GET` | `/api/v1/auth/me` | Return the current user's profile |
-| `POST` | `/api/v1/reports` | Upload a medical report |
-| `GET` | `/api/v1/reports` | List the current user's reports |
-| `GET` | `/api/v1/reports/{id}` | Retrieve an authorized report |
-| `POST` | `/api/v1/reports/{id}/explain` | Request an AI-assisted explanation |
-| `GET` | `/api/v1/reports/{id}/summary` | Retrieve a saved explanation |
-| `POST` | `/api/v1/health-records` | Add a health measurement |
-| `GET` | `/api/v1/health-records` | Retrieve health measurements |
-| `POST` | `/api/v1/appointments` | Create an appointment or reminder |
-| `GET` | `/api/v1/appointments` | List the current user's appointments |
-
-Use authentication and server-side authorization for private resources. The backend must verify ownership on every report, finding, and health-record request; knowing an ID must never grant access.
-
-## Privacy and Safety
-
-Healthcare information is sensitive. Privacy and safety must be considered from the beginning, even for a hackathon prototype.
-
-- Use synthetic or properly de-identified data for demonstrations and tests.
-- Collect and retain only the information needed for the feature.
-- Use HTTPS in deployment and restrict access to private records.
-- Validate file types and sizes; do not trust a filename or client-supplied MIME type alone.
-- Store uploaded files outside publicly served directories and use access-controlled file storage.
-- Keep API keys and credentials on the server, never in frontend code or source control.
-- Avoid sending direct identifiers or unnecessary report content to external AI providers.
-- Clearly distinguish text extracted from a report from AI-generated explanations.
-- Preserve source values and units; do not invent missing results or reference ranges.
-- Treat AI output as potentially inaccurate and encourage users to consult qualified professionals.
-- Provide an appropriate deletion process for user data and uploaded files.
-- Do not present the application as a diagnostic, treatment, or emergency-response system.
-
-Before handling real patient data, assess applicable privacy, security, and healthcare requirements for the deployment location and intended use.
-
-## Development Roadmap
-
-### Phase 1 — Core prototype
-
-- [ ] Build the main dashboard and report upload flow.
-- [ ] Add backend API validation and secure file handling.
-- [ ] Extract text from supported PDF reports.
-- [ ] Add OCR for supported scanned reports, if time permits.
-- [ ] Display structured findings and their source values.
-- [ ] Generate and validate plain-language explanations.
-- [ ] Test the complete flow using synthetic reports.
-
-### Phase 2 — Supporting features
-
-- [ ] Add user accounts and protected report history.
-- [ ] Add manual health measurements and charts.
-- [ ] Add appointment or follow-up reminders.
-- [ ] Improve mobile usability and accessibility.
-
-### Phase 3 — Further development
-
-- [ ] Add carefully evaluated multilingual support.
-- [ ] Improve evaluation with a diverse set of synthetic test reports.
-- [ ] Add monitoring, error reporting, and deployment hardening.
-- [ ] Assess security, privacy, and applicable regulatory obligations before any real-world clinical use.
-
-## Team Contributions
-
-Update this section with actual team members and their contributions.
-
-| Name | Area | Responsibilities |
-|---|---|---|
-| Shubhankit Shukla | Frontend | Dashboard, upload flow, report results, responsive UI |
-| Sonu Kumar | Backend | API routes, database, authentication, file handling |
-| Muhammad Suhail Jalal | AI / document processing | PDF/OCR extraction, explanation workflow, evaluation |
-| Sunsuvan Bakshi | Integration and QA | End-to-end testing, deployment, demo preparation |
-
-## Contributing
-
-1. Create a branch for your change.
-2. Keep changes focused and describe the purpose in your commit message.
-3. Do not commit secrets, credentials, real medical reports, or personal health information.
-4. Add or update tests for changed behavior.
-5. Open a pull request and describe how the change was tested.
-
-## License
-
-No license has been selected yet. Add a `LICENSE` file and update this section once the project team has chosen a license. Do not assume that the code is open source until a license is provided.
+1. In `.env`, set:
+   ```env
+   VITE_API_BASE_URL=https://your-backend-api.com/api/v1
+   VITE_USE_MOCK_API=false
+   ```
+2. Ensure your backend exposes standard REST endpoints matching the service contracts:
+   - `POST /auth/login` → `{ user, token }`
+   - `POST /auth/register` → `{ user, token }`
+   - `GET /reports` → `MedicalReport[]`
+   - `POST /reports/upload` → `multipart/form-data` with `{ report, analysis }`
+   - `GET /reports/:id/analysis` → `ReportAnalysis`
+   - `GET /health/records` → `HealthRecord[]`
+   - `POST /health/records` → `HealthRecord`
+   - `GET /appointments` → `Appointment[]`
+   - `POST /appointments` → `Appointment`
+   - `GET /reminders` → `Reminder[]`
+   - `POST /reminders` → `Reminder`
+   - `PATCH /reminders/:id/complete` → `Reminder`
+3. All UI components will immediately display live data from your real backend without needing any component code modifications!
