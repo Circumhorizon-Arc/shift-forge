@@ -15,6 +15,9 @@ from app.routes import (
     documents_router,
     appointments_router,
     health_router,
+    reports_router,
+    health_records_router,
+    reminders_router,
 )
 
 # Configure logging
@@ -112,6 +115,9 @@ async def global_exception_handler(request: Request, exc: Exception):
 # -------------------------------------------------------------
 app.include_router(health_router)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(reports_router, prefix=settings.API_V1_STR)
+app.include_router(health_records_router, prefix=settings.API_V1_STR)
+app.include_router(reminders_router, prefix=settings.API_V1_STR)
 app.include_router(ai_router, prefix=settings.API_V1_STR)
 app.include_router(documents_router, prefix=settings.API_V1_STR)
 app.include_router(appointments_router, prefix=settings.API_V1_STR)
@@ -120,7 +126,7 @@ app.include_router(appointments_router, prefix=settings.API_V1_STR)
 @app.get("/", tags=["Root"])
 def root():
     return {
-        "message": "Welcome to ShiftForge Healthcare & Well-being API",
+        "message": "Welcome to CareBridge AI — Smart Healthcare Assistant API",
         "docs": "/docs",
         "version": settings.VERSION,
         "theme": "Healthcare & Well-being (IIITD Hackathon)",

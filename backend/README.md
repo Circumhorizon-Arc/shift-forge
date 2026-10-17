@@ -1,99 +1,92 @@
-# 🩺 ShiftForge Healthcare Backend API
+# 🌉 CareBridge AI — Smart Healthcare Assistant
 
 > **IIITD Hackathon — Track 4: Healthcare & Well-being**  
 > *Theme: Reimagining Healthcare Through Technology*
 
-A production-grade, fast, and scalable FastAPI backend built with PostgreSQL (SQLAlchemy + Alembic), Google Gemini AI integration, role-based JWT authentication, file upload processing for medical reports/prescriptions, and interactive Swagger API documentation.
+CareBridge AI is an AI-powered patient support and healthcare coordination platform designed to improve healthcare accessibility, affordability, and quality of care. It provides patients with one unified place to understand complex medical reports, track vital health records, manage doctor appointments, and receive intelligent clinical guidance.
 
 ---
 
-## 🚀 Features
+## 🌟 Core Pillars & Features
 
-- **FastAPI Routes & Authentication**:
-  - Secure bcrypt password hashing
-  - JWT Access Token generation & expiration
-  - Role-Based Access Control (**Patient**, **Doctor**, **Admin**)
-- **PostgreSQL Database & Alembic Migrations**:
-  - SQLAlchemy ORM models: `User`, `Document`, `AIInteraction`, `Appointment`
-  - Automatic Alembic migration setup (`alembic upgrade head`)
-  - Zero-config local SQLite fallback for instant development
-- **File Validation & Document Processing**:
-  - Strict file extension checking (`pdf`, `png`, `jpg`, `jpeg`)
-  - Magic byte verification (header checks preventing file spoofing)
-  - 10MB size limit enforcement
-  - Text & PDF extraction with `pypdf`
-- **AI Service Integration (Google Gemini)**:
-  - Clinical symptom triage & urgency rating (`low`, `moderate`, `high`, `emergency`)
-  - Differential condition suggestions and specialist recommendations
-  - Prescription & lab report summarization
-  - Resilient heuristic fallback engine (backend never crashes during demo)
-- **API Testing, Deployment & Error Handling**:
-  - 100% passing automated test suite with `pytest` and `TestClient`
-  - Global standardized error handlers (CORS, 422 validation, 401/403 auth, 500 unhandled)
-  - Ready-to-deploy `Dockerfile` and `render.yaml` (1-click cloud deployment with PostgreSQL)
+### 1. 🔬 AI Medical Report Explainer (The Centerpiece Demo Feature)
+- **Report Upload:** Supports PDF reports & medical scans with strict magic-byte validation.
+- **High-Fidelity Extraction:** Text extraction powered by **PyMuPDF (`fitz`)** and **`pypdf`**.
+- **Diagnostic Findings Breakdown:** Extracts individual test names, values, measurement units, and reference intervals (flagging abnormal findings).
+- **Plain-Language Explanation:** AI translates complex medical jargon into clear, reassuring language without hallucinating.
+- **Consultation Preparation:** Generates 3-5 tailored, actionable questions the patient can discuss with their doctor.
+- **Medical Guardrails:** Clear clinical disclaimer; acts as an educational and organizational assistant.
+
+### 2. 📊 Health Tracker (Vitals & Measurement Trends)
+- Logs measurements: Blood Pressure, Fasting Glucose, Heart Rate, Weight, BMI.
+- Historical data retrieval endpoint tailored for frontend charting libraries (**Recharts**).
+
+### 3. ⏰ Care Reminders & Teleconsultation Appointments
+- Track follow-up visits, diagnostic reminders, and daily medication schedules.
+- Doctor-patient appointment booking with status management and clinical notes.
+
+### 4. 🤖 AI Clinical Symptom Triage
+- 4-Tier urgency triage: `low` (green), `moderate` (yellow), `high` (orange), `emergency` (red).
+- Suggests appropriate medical specialists (e.g. Cardiologist, ENT, General Physician).
+- Resilient heuristic fallback engine guarantees 100% demo uptime.
 
 ---
 
-## 🛠️ Quickstart
+## 🏗️ Architecture & Technology Stack
 
-### 1. Setup Virtual Environment
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Backend Framework** | **FastAPI (Python)** | Asynchronous REST APIs, auto OpenAPI / Swagger documentation |
+| **Database** | **PostgreSQL (SQLAlchemy 2.0 + Alembic)** | Relational data integrity, schema migrations, SQLite local fallback |
+| **Document Processing** | **PyMuPDF + Pillow + pypdf** | PDF parsing, table extraction, header inspection |
+| **AI Engine** | **Google Gemini (`gemini-1.5-flash`)** | Grounded report explanation, triage reasoning & consultation generation |
+| **Security** | **Bcrypt + PyJWT (HTTPBearer)** | 12-round password hashing, stateless token auth, Role-Based Access Control |
+| **Testing** | **pytest + TestClient** | 100% passing automated test suite |
+
+---
+
+## 📡 API Endpoints (CareBridge AI Blueprint)
+
+| Method | Endpoint | Description | Auth |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/register` | Register new account (patient / doctor) | Public |
+| `POST` | `/api/v1/auth/login` | Authenticate & retrieve JWT Bearer token | Public |
+| `GET` | `/api/v1/auth/me` | Fetch authenticated user profile | Bearer |
+| `POST` | `/api/v1/reports` | Upload medical report (PDF/Image) | Bearer |
+| `GET` | `/api/v1/reports` | List patient's uploaded reports | Bearer |
+| `GET` | `/api/v1/reports/{id}` | Retrieve report details | Bearer |
+| `POST` | `/api/v1/reports/{id}/explain` | **Trigger AI Report Explainer & Doctor Questions** | Bearer |
+| `GET` | `/api/v1/reports/{id}/summary` | Retrieve pre-generated AI report summary | Bearer |
+| `POST` | `/api/v1/health-records` | Add health vital measurement (BP, Glucose, etc.) | Bearer |
+| `GET` | `/api/v1/health-records` | Retrieve measurement history (for charts) | Bearer |
+| `POST` | `/api/v1/reminders` | Create medication or follow-up reminder | Bearer |
+| `GET` | `/api/v1/reminders` | List active & completed reminders | Bearer |
+| `PATCH`| `/api/v1/reminders/{id}` | Update or mark reminder completed | Bearer |
+| `POST` | `/api/v1/ai/symptom-check` | AI symptom triage & specialist guidance | Bearer |
+| `POST` | `/api/v1/appointments/` | Book doctor appointment | Bearer |
+| `GET` | `/api/v1/appointments/` | List appointments (role filtered) | Bearer |
+| `GET` | `/health` | Health & database readiness check | Public |
+
+---
+
+## 🚀 Running Locally
+
 ```bash
-# Windows
+cd backend
 python -m venv .venv
-.\.venv\Scripts\activate
-
-# Linux / macOS
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 2. Install Dependencies
-```bash
+.\.venv\Scripts\activate       # Windows
+source .venv/bin/activate      # Linux/macOS
 pip install -r requirements.txt
-```
-
-### 3. Configure Environment Variables
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-Add your `GEMINI_API_KEY` in `.env` (optional: works in heuristic mode even without key).
-Set your `DATABASE_URL` (e.g. `postgresql://user:pass@localhost:5432/shiftforge` or keep SQLite for local testing).
-
-### 4. Run Migrations
-```bash
 alembic upgrade head
-```
-
-### 5. Start Development Server
-```bash
 uvicorn app.main:app --reload --port 8000
 ```
-Open **Interactive Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)  
-Open **Alternative ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+- **Interactive Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
-## 🧪 Run Automated Tests
+## 🧪 Run Tests
 ```bash
 pytest -v
 ```
-
----
-
-## 📡 API Endpoints Overview
-
-| Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Health & DB connection check | Public |
-| `POST` | `/api/v1/auth/register` | Register new user (Patient / Doctor) | Public |
-| `POST` | `/api/v1/auth/login` | Login and receive JWT access token | Public |
-| `GET` | `/api/v1/auth/me` | Fetch authenticated user profile | Bearer Token |
-| `POST` | `/api/v1/ai/symptom-check` | AI symptom triage & specialist guidance | Bearer Token |
-| `GET` | `/api/v1/ai/history` | User's past triage history | Bearer Token |
-| `POST` | `/api/v1/documents/upload` | Upload & AI process prescription/report | Bearer Token |
-| `GET` | `/api/v1/documents/` | List medical records | Bearer Token |
-| `GET` | `/api/v1/documents/{id}` | View single record | Bearer Token |
-| `POST` | `/api/v1/appointments/` | Book doctor appointment | Bearer Token |
-| `GET` | `/api/v1/appointments/` | List appointments (role filtered) | Bearer Token |
-| `PATCH`| `/api/v1/appointments/{id}`| Update status / doctor notes | Doctor/Admin |

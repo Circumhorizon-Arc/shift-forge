@@ -1,23 +1,53 @@
 from pathlib import Path
 from typing import Optional
-from pypdf import PdfReader
 from PIL import Image
+
+try:
+    import fitz  # PyMuPDF
+    HAS_PYMUPDF = True
+except ImportError:
+    HAS_PYMUPDF = False
+
+try:
+    from pypdf import PdfReader
+    HAS_PYPDF = True
+except ImportError:
+    HAS_PYPDF = False
 
 
 class DocumentProcessor:
     @staticmethod
     def extract_text_from_pdf(file_path: str) -> str:
-        """Extracts text content from a PDF document."""
-        extracted_text = []
-        try:
-            reader = PdfReader(file_path)
-            for page_idx, page in enumerate(reader.pages):
-                text = page.extract_text()
-                if text:
-                    extracted_text.append(f"--- Page {page_idx + 1} ---\n{text}")
-            return "\n\n".join(extracted_text).strip()
-        except Exception as e:
-            return f"[PDF text extraction failed: {str(e)}]"
+        """Extracts text content from a PDF document using PyMuPDF (fast & high fidelity) or pypdf."""
+        # 1. Try PyMuPDF first
+        if HAS_PYMUPDF:
+            try:
+                doc = fitz.open(file_path)
+                pages_text = []
+                for page_idx, page in enumerate(doc):
+                    text = page.get_text()
+                    if text.strip():
+                        pages_text.append(f"--- Page {page_idx + 1} ---\n{text.strip()}")
+                doc.close()
+                if pages_text:
+                    return "\n\n".join(pages_text)
+            except Exception:
+                pass
+
+        # 2. Fallback to pypdf
+        if HAS_PYPDF:
+            try:
+                reader = PdfReader(file_path)
+                extracted_text = []
+                for page_idx, page in enumerate(reader.pages):
+                    text = page.extract_text()
+                    if text:
+                        extracted_text.append(f"--- Page {page_idx + 1} ---\n{text}")
+                return "\n\n".join(extracted_text).strip()
+            except Exception as e:
+                return f"[PDF text extraction failed: {str(e)}]"
+
+        return "[No PDF extraction library available]"
 
     @staticmethod
     def inspect_image(file_path: str) -> dict:
@@ -42,8 +72,7 @@ class DocumentProcessor:
         if ext == "pdf":
             return cls.extract_text_from_pdf(file_path)
         elif ext in ["png", "jpg", "jpeg"]:
-            # For images, image OCR or Gemini Vision will process raw image bytes
-            return f"[Image document: {ext.upper()} file ready for AI Vision inspection]"
+            return f"[Medical Image / Scan: {ext.upper()} file ready for clinical inspection]"
         return None
 
 

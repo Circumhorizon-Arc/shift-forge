@@ -5,7 +5,7 @@ from pydantic import field_validator
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ShiftForge Healthcare API"
+    PROJECT_NAME: str = "CareBridge AI — Smart Healthcare Assistant"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     PORT: int = 8000

@@ -1,54 +1,41 @@
-# 🩺 ShiftForge — Healthcare & Well-being Platform
+# 🌉 CareBridge AI — Smart Healthcare Assistant
 
 > **IIITD Hackathon Project**  
-> **Theme 4:** Reimagining Healthcare Through Technology  
-> **Objective:** Develop technology-driven solutions to improve healthcare accessibility, affordability, and quality of care via AI-assisted guidance, smart digital health management, and remote consultations.
+> **Theme 4:** Healthcare & Well-being (Reimagining Healthcare Through Technology)  
+> **Mission:** Empowering patients to understand medical reports, track health vitals, manage appointments, and receive intelligent clinical triage guidance.
 
 ---
 
-## 🏗️ Project Architecture
-
-```
-shift-forge/
-├── .gitignore
-├── README.md
-└── backend/
-    ├── app/
-    │   ├── core/           # Security (JWT, bcrypt) & RBAC Dependencies
-    │   ├── models/         # PostgreSQL SQLAlchemy Models (User, Document, AIInteraction, Appointment)
-    │   ├── routes/         # FastAPI Routers (Auth, AI, Documents, Appointments, Health)
-    │   ├── schemas/        # Pydantic v2 validation models
-    │   ├── services/       # File validation, PDF parser & Google Gemini AI service
-    │   ├── config.py       # Pydantic settings & env management
-    │   ├── database.py     # Database engine & session generator
-    │   └── main.py         # App factory, CORS, exception handlers
-    ├── alembic/            # Database schema migrations
-    ├── tests/              # 100% passing automated test suite (pytest)
-    ├── Dockerfile          # Containerized deployment
-    ├── render.yaml         # 1-click cloud deployment with PostgreSQL
-    └── requirements.txt    # Python dependencies
-```
+## 🌟 The Centerpiece: AI Medical Report Explainer
+- **High-Fidelity PDF/OCR Extraction:** Powered by **PyMuPDF (`fitz`)** and `pypdf`.
+- **Diagnostic Findings Breakdown:** Extracts test names, reported values, units, and standard reference intervals.
+- **Plain-Language Explanations:** Explains what clinical terms mean without medical jargon.
+- **Doctor Consultation Questions:** Generates personalized questions patients can discuss with their clinician.
+- **Clinical Safety Guardrails:** Clear educational disclaimer; no unauthorized prescriptions or self-diagnosis.
 
 ---
 
-## 🚀 Running the Backend
+## 📊 Complete Feature Matrix
+1. **AI Medical Report Explainer:** `/api/v1/reports` & `/api/v1/reports/{id}/explain`
+2. **Health Tracker (Vitals for Charts):** `/api/v1/health-records`
+3. **Care Reminders (Medications & Follow-ups):** `/api/v1/reminders`
+4. **Clinical Symptom Triage:** `/api/v1/ai/symptom-check`
+5. **Doctor-Patient Appointments:** `/api/v1/appointments`
+6. **Authentication & Security:** `/api/v1/auth/register` & `/api/v1/auth/login`
+
+---
+
+## 🚀 Running the Project
 
 ```bash
 cd backend
 python -m venv .venv
 .\.venv\Scripts\activate       # Windows
+source .venv/bin/activate      # Linux/macOS
 pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
 - **Interactive API Docs (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check Endpoint:** [http://localhost:8000/health](http://localhost:8000/health)
-
----
-
-## 🧪 Testing
-```bash
-cd backend
-pytest -v
-```
+- **Automated Tests (100% Passing):** `pytest -v`
