@@ -3,7 +3,7 @@
 import shutil
 from pathlib import Path
 from typing import List, Literal, Optional
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -48,10 +48,61 @@ class Settings(BaseSettings):
     LLM_TIMEOUT_SECONDS: float = Field(default=30.0, description="Timeout for LLM API requests in seconds")
     LLM_TEMPERATURE: float = Field(default=0.1, description="Sampling temperature for LLM generation")
 
+    # ---------------------------------------------------------------------------
+    # CORS
+    # ---------------------------------------------------------------------------
+    # Comma-separated list of allowed frontend origins, or a JSON list string.
+    # Examples:
+    #   CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+    #   CORS_ORIGINS=["https://app.healthsense.example.com"]
+    # Leave empty to disable browser CORS entirely (server-to-server only).
+    # WARNING: Do NOT set CORS_ORIGINS=* in production when credentials are enabled.
+    CORS_ORIGINS: List[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:8000",
+        ],
+        description=(
+            "Explicit list of allowed browser origins for CORS. "
+            "Must not be wildcard when credentials are in use."
+        ),
+    )
+
+    # ---------------------------------------------------------------------------
     # Standalone FastAPI Server Settings
-    HOST: str = Field(default="0.0.0.0", description="Server bind host")
+    # ---------------------------------------------------------------------------
+    # Default to loopback for local development. In a container set HOST=0.0.0.0
+    # and ensure the deployment network restricts external exposure.
+    HOST: str = Field(default="127.0.0.1", description="Server bind host (use 0.0.0.0 inside containers)")
     PORT: int = Field(default=8001, description="Server port")
-    DEBUG: bool = Field(default=False, description="Debug mode")
+    DEBUG: bool = Field(default=False, description="Debug mode (never enable in production)")
+
+    # ---------------------------------------------------------------------------
+    # Internal service token for protecting the uploads history endpoint.
+    # Set a long random string (e.g. `openssl rand -hex 32`) shared with the
+    # main backend. Leave empty to disable the endpoint entirely.
+    # ---------------------------------------------------------------------------
+    INTERNAL_SERVICE_TOKEN: Optional[str] = Field(
+        default=None,
+        description=(
+            "Bearer token for service-to-service authentication on /api/v1/uploads. "
+            "Generate with: openssl rand -hex 32. "
+            "Leave unset to disable the uploads endpoint."
+        ),
+    )
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: object) -> List[str]:
+        """Accept a comma-separated string or a list."""
+        if isinstance(v, str):
+            import json
+            stripped = v.strip()
+            if stripped.startswith("["):
+                return json.loads(stripped)
+            return [o.strip() for o in stripped.split(",") if o.strip()]
+        return v  # type: ignore[return-value]
 
     @property
     def max_file_size_bytes(self) -> int:
