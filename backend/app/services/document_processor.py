@@ -3,15 +3,19 @@ from typing import Optional
 from PIL import Image
 
 try:
+    # pyrefly: ignore[missing-import]
     import fitz  # PyMuPDF
     HAS_PYMUPDF = True
 except ImportError:
+    fitz = None
     HAS_PYMUPDF = False
 
 try:
+    # pyrefly: ignore[missing-import]
     from pypdf import PdfReader
     HAS_PYPDF = True
 except ImportError:
+    PdfReader = None
     HAS_PYPDF = False
 
 
@@ -20,11 +24,12 @@ class DocumentProcessor:
     def extract_text_from_pdf(file_path: str) -> str:
         """Extracts text content from a PDF document using PyMuPDF (fast & high fidelity) or pypdf."""
         # 1. Try PyMuPDF first
-        if HAS_PYMUPDF:
+        if HAS_PYMUPDF and fitz is not None:
             try:
                 doc = fitz.open(file_path)
                 pages_text = []
-                for page_idx, page in enumerate(doc):
+                for page_idx in range(len(doc)):
+                    page = doc[page_idx]
                     text = page.get_text()
                     if text.strip():
                         pages_text.append(f"--- Page {page_idx + 1} ---\n{text.strip()}")
@@ -35,7 +40,7 @@ class DocumentProcessor:
                 pass
 
         # 2. Fallback to pypdf
-        if HAS_PYPDF:
+        if HAS_PYPDF and PdfReader is not None:
             try:
                 reader = PdfReader(file_path)
                 extracted_text = []

@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
+# pyrefly: ignore[missing-import]
 import pytest
 
 from app.config import settings
@@ -84,6 +85,7 @@ async def test_process_medical_report_success_async(digital_pdf_bytes: bytes):
     assert_filename_not_exposed(analysis.model_dump(), SENSITIVE_FILENAME)
 
 
+@pytest.mark.skipif(settings.resolve_tesseract_path() is None, reason="Tesseract OCR not installed in PATH")
 def test_process_image_report_sync(sample_image_bytes: bytes):
     """Test processing an image file."""
     with patch(

@@ -5,9 +5,20 @@ from app.models.appointment import AppointmentStatus
 
 
 class AppointmentCreate(BaseModel):
-    doctor_id: int
-    appointment_time: datetime
-    reason: str = Field(..., min_length=3, max_length=300)
+    doctor_id: Optional[int] = None
+    appointment_time: Optional[datetime] = None
+    reason: Optional[str] = "Routine consultation and lab review"
+
+    # Frontend fields
+    doctorName: Optional[str] = None
+    specialty: Optional[str] = None
+    date: Optional[str] = None
+    time: Optional[str] = None
+    clinicOrHospital: Optional[str] = None
+    type: Optional[str] = "in-person"
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AppointmentUpdate(BaseModel):
@@ -26,4 +37,14 @@ class AppointmentResponse(BaseModel):
     doctor_notes: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+
+    # Frontend compatibility fields
+    doctorName: Optional[str] = None
+    specialty: Optional[str] = None
+    date: Optional[str] = None
+    time: Optional[str] = None
+    clinicOrHospital: Optional[str] = None
+    type: Optional[str] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)

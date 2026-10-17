@@ -1,7 +1,8 @@
 import enum
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 from app.database import Base
 
 
@@ -14,15 +15,15 @@ class UserRole(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
-    full_name = Column(String(150), nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.PATIENT, nullable=False)
-    phone = Column(String(30), nullable=True)
-    is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    id: Mapped[int] = Column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = Column(String(255), nullable=False)
+    full_name: Mapped[str] = Column(String(150), nullable=False)
+    role: Mapped[UserRole] = Column(Enum(UserRole), default=UserRole.PATIENT, nullable=False)
+    phone: Mapped[Optional[str]] = Column(String(30), nullable=True)
+    is_active: Mapped[bool] = Column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     documents = relationship("Document", back_populates="user", cascade="all, delete-orphan")

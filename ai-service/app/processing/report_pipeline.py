@@ -3,8 +3,9 @@
 import logging
 import os
 import time
+# pyrefly: ignore[missing-import]
 import uuid
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from app.config import settings
 from app.exceptions import (
@@ -135,7 +136,7 @@ def _check_text_quality(extracted_text: str) -> None:
 def _generate_explanation(
     extracted_text: str,
     findings: list,
-) -> tuple[LLMExplanationPayload, str]:
+) -> tuple[LLMExplanationPayload, Literal["success", "partial", "error"]]:
     """Generate an explanation synchronously with a safe fallback."""
     try:
         explanation = get_llm_client().generate_explanation(
@@ -160,7 +161,7 @@ def _generate_explanation(
 async def _generate_explanation_async(
     extracted_text: str,
     findings: list,
-) -> tuple[LLMExplanationPayload, str]:
+) -> tuple[LLMExplanationPayload, Literal["success", "partial", "error"]]:
     """Generate an explanation asynchronously with a safe fallback."""
     try:
         explanation = await get_llm_client().generate_explanation_async(
@@ -189,7 +190,7 @@ def _build_result(
     findings: list,
     report_date: Optional[str],
     explanation: LLMExplanationPayload,
-    pipeline_status: str,
+    pipeline_status: Literal["success", "partial", "error"],
     duration_ms: float,
     upload_label: str,
 ) -> ReportAnalysis:
@@ -225,7 +226,7 @@ def _record_to_tracker(
     extraction_res: dict[str, Any],
     result: ReportAnalysis,
     findings: list,
-    pipeline_status: str,
+    pipeline_status: Literal["success", "partial", "error"],
     duration_ms: float,
     report_date: Optional[str],
 ) -> None:

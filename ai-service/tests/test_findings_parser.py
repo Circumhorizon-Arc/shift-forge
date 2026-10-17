@@ -15,6 +15,7 @@ def test_parse_finding_standard_columnar():
     assert finding.test_name == "Hemoglobin"
     assert finding.value == "14.2"
     assert finding.unit == "g/dL"
+    assert finding.reference_range is not None
     assert "13.5" in finding.reference_range and "17.5" in finding.reference_range
     assert finding.reported_flag == "NORMAL"
     assert finding.source_text == line
@@ -39,6 +40,7 @@ def test_parse_finding_less_than_reference_range():
     assert finding.test_name == "Total Cholesterol"
     assert finding.value == "235"
     assert finding.unit == "mg/dL"
+    assert finding.reference_range is not None
     assert "<" in finding.reference_range
     assert finding.reported_flag == "HIGH"
 

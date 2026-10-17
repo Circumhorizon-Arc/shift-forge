@@ -1,9 +1,11 @@
 """Tests for upload tracker: persistence, pagination, ordering, isolation, and error handling."""
 
+# pyrefly: ignore[missing-import]
+from typing import Any
 import json
 from pathlib import Path
 from unittest.mock import patch
-
+# pyrefly: ignore[missing-import]
 import pytest
 
 from app.tracker import (
@@ -19,7 +21,7 @@ from app.tracker import (
 
 
 def _make_record(**kwargs) -> UploadRecord:
-    defaults = dict(label="upload-abc123.pdf", file_size_bytes=1024)
+    defaults: dict[str, Any] = dict(label="upload-abc123.pdf", file_size_bytes=1024)
     defaults.update(kwargs)
     return UploadRecord(**defaults)
 
@@ -163,7 +165,7 @@ class TestModuleLevelFunctions:
     def test_record_upload_swallows_tracker_exception(self, isolated_tracker: InMemoryTracker):
         """Tracker failure must not propagate — it should be logged and swallowed."""
         class BrokenTracker(AbstractTracker):
-            def record(self, r): raise RuntimeError("storage down")
+            def record(self, record): raise RuntimeError("storage down")
             def get_all(self, limit=100, offset=0): return []
             def count(self): return 0
 

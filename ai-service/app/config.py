@@ -3,7 +3,9 @@
 import shutil
 from pathlib import Path
 from typing import List, Literal, Optional
+# pyrefly: ignore[missing-import]
 from pydantic import Field, field_validator
+# pyrefly: ignore[missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -114,8 +116,10 @@ class Settings(BaseSettings):
         if self.TESSERACT_CMD and Path(self.TESSERACT_CMD).is_file():
             return self.TESSERACT_CMD
 
-        # Search standard paths on macOS / Linux
+        # Search standard paths across Windows, macOS, and Linux
         candidate_paths = [
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
             "/opt/homebrew/bin/tesseract",
             "/usr/local/bin/tesseract",
             "/usr/bin/tesseract",

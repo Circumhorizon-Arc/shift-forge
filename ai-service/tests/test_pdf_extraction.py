@@ -1,7 +1,6 @@
-"""Tests for PDF text extraction engine."""
-
+# pyrefly: ignore[missing-import]
 import pytest
-import pymupdf
+from app.config import settings
 from app.exceptions import CorruptedFileError, EmptyFileError
 from app.extraction.pdf_extractor import extract_text_from_pdf
 from tests.conftest import create_synthetic_scanned_pdf
@@ -48,6 +47,7 @@ def test_partially_corrupted_pdf_header():
         extract_text_from_pdf(b"%NOT_A_PDF header content here", filename="bad_header.pdf")
 
 
+@pytest.mark.skipif(settings.resolve_tesseract_path() is None, reason="Tesseract OCR not installed in PATH")
 def test_scanned_pdf_ocr_fallback():
     """Test that a scanned PDF (image only) falls back to OCR."""
     scanned_text = "Fasting Glucose 105 mg/dL 70-99 HIGH"

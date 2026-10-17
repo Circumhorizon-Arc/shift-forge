@@ -2,14 +2,16 @@
 
 import io
 from typing import Any, Dict, List
-import pymupdf
 from PIL import Image
 
 from app.config import settings
 from app.exceptions import CorruptedFileError, EmptyFileError, OCRError
 from app.extraction.image_ocr import configure_tesseract, sanitize_extracted_text
 from app.extraction.preprocessing import preprocess_image_for_ocr
+# pyrefly: ignore[missing-import]
 import pytesseract
+# pyrefly: ignore[missing-import]
+import pymupdf
 
 
 def extract_text_from_scanned_page(page: pymupdf.Page, page_num: int) -> str:
@@ -18,7 +20,7 @@ def extract_text_from_scanned_page(page: pymupdf.Page, page_num: int) -> str:
     try:
         # Render page at 200 DPI for high fidelity character recognition
         pix = page.get_pixmap(dpi=200)
-        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
         preprocessed = preprocess_image_for_ocr(img)
 
         text = pytesseract.image_to_string(preprocessed, config=r"--oem 3 --psm 6")
@@ -81,18 +83,25 @@ def extract_text_from_pdf(
             page = doc[page_index]
 
             # Attempt direct digital text extraction first
-            page_text = page.get_text("text") or ""
+            raw_text = page.get_text("text")
+            page_text = str(raw_text) if raw_text else ""
             cleaned_page_text = sanitize_extracted_text(page_text)
 
             # Determine if this page is scanned (negligible digital text)
             if len(cleaned_page_text) < settings.MIN_EXTRACTABLE_TEXT_CHARS:
                 # Page has very little digital text; attempt OCR fallback
-                ocr_text = extract_text_from_scanned_page(page, page_num)
-                if len(ocr_text) > len(cleaned_page_text):
-                    cleaned_page_text = ocr_text
-                    method = "ocr_scanned_pdf"
-                else:
-                    method = "pdf_text"
+                try:
+                    ocr_text = extract_text_from_scanned_page(page, page_num)
+                    if len(ocr_text) > len(cleaned_page_text):
+                        cleaned_page_text = ocr_text
+                        method = "ocr_scanned_pdf"
+                    else:
+                        method = "pdf_text"
+                except OCRError:
+                    if cleaned_page_text:
+                        method = "pdf_text"
+                    else:
+                        raise
             else:
                 method = "pdf_text"
 

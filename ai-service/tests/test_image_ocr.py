@@ -1,6 +1,8 @@
 """Tests for image OCR extraction and preprocessing."""
 
+# pyrefly: ignore[missing-import]
 import pytest
+from app.config import settings
 from app.exceptions import CorruptedFileError, EmptyFileError
 from app.extraction.image_ocr import extract_text_from_image, sanitize_extracted_text
 from app.extraction.preprocessing import preprocess_image_for_ocr
@@ -25,6 +27,7 @@ def test_preprocess_image_returns_grayscale():
     assert processed.width >= 800
 
 
+@pytest.mark.skipif(settings.resolve_tesseract_path() is None, reason="Tesseract OCR not installed in PATH")
 def test_extract_text_from_valid_png_image():
     """Verify OCR extracts text from a valid PNG image."""
     text_content = "Fasting Glucose 105 mg/dL 70-99 HIGH"
@@ -36,6 +39,7 @@ def test_extract_text_from_valid_png_image():
     assert "Glucose" in res["text"] or "105" in res["text"]
 
 
+@pytest.mark.skipif(settings.resolve_tesseract_path() is None, reason="Tesseract OCR not installed in PATH")
 def test_extract_text_from_valid_jpeg_image():
     """Verify OCR extracts text from a valid JPEG image."""
     text_content = "Hemoglobin 14.5 g/dL"

@@ -1,0 +1,23 @@
+{
+  "venvPath": "backend",
+  "venv": ".venv",
+  "executionEnvironments": [
+    {
+      "root": "ai-service",
+      "extraPaths": [
+        "ai-service"
+      ]
+    },
+    {
+      "root": "backend",
+      "extraPaths": [
+        "backend"
+      ]
+    }
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "backend/.venv"
+  ]
+}

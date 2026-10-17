@@ -1,12 +1,20 @@
 """Unit tests for Pydantic schema validation."""
 
+# pyrefly: ignore[missing-import]
 import pytest
+# pyrefly: ignore[missing-import]
 from pydantic import ValidationError
+# pyrefly: ignore[missing-import]
 from app.schemas import (
+    # pyrefly: ignore[missing-import]
     ExtractedFinding,
+    # pyrefly: ignore[missing-import]
     MedicalTermExplanation,
+    # pyrefly: ignore[missing-import]
     ReportAnalysis,
+    # pyrefly: ignore[missing-import]
     ExtractionMethod,
+    # pyrefly: ignore[missing-import]
     ErrorResponse,
 )
 
@@ -46,10 +54,10 @@ def test_extracted_finding_nullable_fields():
 def test_extracted_finding_requires_mandatory_fields():
     """Verify validation errors when test_name or value or source_text are missing."""
     with pytest.raises(ValidationError):
-        ExtractedFinding(test_name="Glucose", source_text="Glucose")  # Missing value
+        ExtractedFinding(test_name="Glucose", source_text="Glucose")  # type: ignore[call-arg]  # Missing value
 
     with pytest.raises(ValidationError):
-        ExtractedFinding(value="105", source_text="105")  # Missing test_name
+        ExtractedFinding(value="105", source_text="105")  # type: ignore[call-arg]  # Missing test_name
 
 
 def test_report_analysis_schema_complete():
@@ -100,4 +108,4 @@ def test_error_response_schema():
     )
     assert err.status == "error"
     assert err.error_code == "INVALID_FILE_TYPE"
-    assert err.details["extension"] == ".docx"
+    assert err.details is not None and err.details["extension"] == ".docx"

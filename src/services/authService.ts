@@ -27,10 +27,20 @@ export const authService = {
     }
 
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/login', { email, password: _password })
-      localStorage.setItem(TOKEN_KEY, response.data.token)
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(response.data.user))
-      return response.data
+      const response = await apiClient.post<any>('/auth/login', { email, password: _password })
+      const token = response.data.token || response.data.access_token
+      const rawUser = response.data.user || response.data
+      const user: User = {
+        id: String(rawUser.id || rawUser.user_id || 'usr-1'),
+        fullName: rawUser.fullName || rawUser.full_name || 'HealthSense User',
+        email: rawUser.email || email,
+        dateOfBirth: rawUser.dateOfBirth || rawUser.date_of_birth || '',
+        phone: rawUser.phone || '',
+        createdAt: rawUser.createdAt || rawUser.created_at || new Date().toISOString(),
+      }
+      if (token) localStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(user))
+      return { user, token }
     } catch (error) {
       throw handleApiError(error)
     }
@@ -53,15 +63,25 @@ export const authService = {
     }
 
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/register', {
+      const response = await apiClient.post<any>('/auth/register', {
         fullName,
         email,
         password: _password,
         dateOfBirth,
       })
-      localStorage.setItem(TOKEN_KEY, response.data.token)
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(response.data.user))
-      return response.data
+      const token = response.data.token || response.data.access_token
+      const rawUser = response.data.user || response.data
+      const user: User = {
+        id: String(rawUser.id || rawUser.user_id || 'usr-1'),
+        fullName: rawUser.fullName || rawUser.full_name || fullName,
+        email: rawUser.email || email,
+        dateOfBirth: rawUser.dateOfBirth || rawUser.date_of_birth || dateOfBirth || '',
+        phone: rawUser.phone || '',
+        createdAt: rawUser.createdAt || rawUser.created_at || new Date().toISOString(),
+      }
+      if (token) localStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(user))
+      return { user, token }
     } catch (error) {
       throw handleApiError(error)
     }
@@ -77,9 +97,18 @@ export const authService = {
     }
 
     try {
-      const response = await apiClient.get<User>('/auth/me')
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(response.data))
-      return response.data
+      const response = await apiClient.get<any>('/auth/me')
+      const rawUser = response.data.user || response.data
+      const user: User = {
+        id: String(rawUser.id || rawUser.user_id || 'usr-1'),
+        fullName: rawUser.fullName || rawUser.full_name || 'HealthSense User',
+        email: rawUser.email || '',
+        dateOfBirth: rawUser.dateOfBirth || rawUser.date_of_birth || '',
+        phone: rawUser.phone || '',
+        createdAt: rawUser.createdAt || rawUser.created_at || '',
+      }
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(user))
+      return user
     } catch {
       return null
     }
@@ -95,9 +124,18 @@ export const authService = {
     }
 
     try {
-      const response = await apiClient.put<User>('/auth/profile', updates)
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(response.data))
-      return response.data
+      const response = await apiClient.put<any>('/auth/profile', updates)
+      const rawUser = response.data.user || response.data
+      const user: User = {
+        id: String(rawUser.id || rawUser.user_id || 'usr-1'),
+        fullName: rawUser.fullName || rawUser.full_name || '',
+        email: rawUser.email || '',
+        dateOfBirth: rawUser.dateOfBirth || rawUser.date_of_birth || '',
+        phone: rawUser.phone || '',
+        createdAt: rawUser.createdAt || rawUser.created_at || '',
+      }
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(user))
+      return user
     } catch (error) {
       throw handleApiError(error)
     }

@@ -1,7 +1,11 @@
 import enum
 from datetime import datetime
+from typing import Optional
+# pyrefly: ignore[missing-import]
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum
-from sqlalchemy.orm import relationship
+# pyrefly: ignore[missing-import]
+from sqlalchemy.orm import relationship, Mapped
+# pyrefly: ignore[missing-import]
 from app.database import Base
 
 
@@ -15,17 +19,17 @@ class TriageLevel(str, enum.Enum):
 class AIInteraction(Base):
     __tablename__ = "ai_interactions"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    user_query = Column(Text, nullable=False)
-    symptoms = Column(Text, nullable=True)
-    triage_level = Column(Enum(TriageLevel), default=TriageLevel.LOW, nullable=False)
-    possible_conditions = Column(Text, nullable=True)  # JSON or bullet list
-    recommendations = Column(Text, nullable=False)
-    suggested_specialist = Column(String(100), nullable=True)  # e.g., Neurologist, General Physician
-    raw_ai_response = Column(Text, nullable=True)
+    id: Mapped[int] = Column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_query: Mapped[str] = Column(Text, nullable=False)
+    symptoms: Mapped[Optional[str]] = Column(Text, nullable=True)
+    triage_level: Mapped[TriageLevel] = Column(Enum(TriageLevel), default=TriageLevel.LOW, nullable=False)
+    possible_conditions: Mapped[Optional[str]] = Column(Text, nullable=True)  # JSON or bullet list
+    recommendations: Mapped[str] = Column(Text, nullable=False)
+    suggested_specialist: Mapped[Optional[str]] = Column(String(100), nullable=True)  # e.g., Neurologist, General Physician
+    raw_ai_response: Mapped[Optional[str]] = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="ai_interactions")

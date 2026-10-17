@@ -20,9 +20,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 
-    # AI Configuration (Gemini)
+    # AI Configuration (Gemini & Microservice)
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-1.5-flash"
+    AI_SERVICE_URL: str = "http://localhost:8001"
+    AI_SERVICE_TIMEOUT_SECONDS: float = 30.0
 
     # File Upload Settings
     UPLOAD_DIR: str = "./uploads"
