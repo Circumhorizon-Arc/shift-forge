@@ -1,0 +1,48 @@
+import { Appointment } from '../../types'
+
+export const initialMockAppointments: Appointment[] = [
+  {
+    id: 'apt-001',
+    doctorName: 'Dr. Sarah Sharma',
+    specialty: 'Internal Medicine & Primary Care',
+    date: '2026-10-17',
+    time: '4:30 PM',
+    clinicOrHospital: 'City General Wellness Pavilion, Suite 402',
+    status: 'upcoming',
+    type: 'in-person',
+    notes: 'Follow-up discussion on recent metabolic panel and glucose levels.',
+  },
+  {
+    id: 'apt-002',
+    doctorName: 'Dr. Marcus Vance',
+    specialty: 'Cardiology Specialist',
+    date: '2026-11-04',
+    time: '10:15 AM',
+    clinicOrHospital: 'Harbor Heart & Vascular Institute',
+    status: 'upcoming',
+    type: 'in-person',
+    notes: 'Annual preventive cardiovascular checkup and ECG review.',
+  },
+  {
+    id: 'apt-003',
+    doctorName: 'Dr. Emily Chen',
+    specialty: 'Endocrinology & Metabolism',
+    date: '2026-09-22',
+    time: '2:00 PM',
+    clinicOrHospital: 'Northside Health Tower',
+    status: 'completed',
+    type: 'telehealth',
+    notes: 'Reviewed thyroid TSH & FT4 laboratory assessment. Levels verified stable.',
+  },
+  {
+    id: 'apt-004',
+    doctorName: 'Dr. Alan Miller',
+    specialty: 'Dermatology & Skin Health',
+    date: '2026-07-14',
+    time: '11:00 AM',
+    clinicOrHospital: 'West End Dermatology Associates',
+    status: 'completed',
+    type: 'in-person',
+    notes: 'Routine full-body skin check. All clear.',
+  },
+]
