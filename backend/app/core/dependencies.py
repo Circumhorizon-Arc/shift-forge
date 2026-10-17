@@ -1,6 +1,6 @@
 from typing import List, Callable
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -8,15 +8,17 @@ from app.database import get_db
 from app.core.security import decode_access_token
 from app.models.user import User, UserRole
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login"
+security_scheme = HTTPBearer(
+    scheme_name="JWT Token",
+    description="Enter your JWT access token obtained from /api/v1/auth/login",
 )
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
     db: Session = Depends(get_db),
 ) -> User:
+    token = credentials.credentials
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials or token expired",
